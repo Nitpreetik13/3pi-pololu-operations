@@ -1,0 +1,52 @@
+#include <Pololu3piPlus32U4.h>
+using namespace Pololu3piPlus32U4;
+Encoders encoders;
+Buzzer buzzer;
+Motors motors;
+ButtonA buttonA;
+unsigned long currentMillis;
+unsigned long prevMillis;
+const unsigned long Period=50;
+long countleft=0;
+long countright=0;
+long prevright=0;
+long prevleft=0;
+
+float sl=0.0F;
+float sr=0.0F;
+const int clickperrotation=8;
+const float gearratio=15.25F;
+const float wheeldia=3.2;
+const int wheelcircum=10.0531;
+
+void setup() {
+  Serial.begin(57600);
+  delay(1000);
+  buzzer.play("c32");
+
+}
+
+void loop() {
+  checkEncoders();
+
+}
+void checkEncoders(){
+  currentMillis=millis();
+  if(currentMillis > prevMillis + Period){
+    countleft+=encoders.getCountsAndResetLeft();
+    countright+=encoders.getCountsAndResetRight();
+
+    sl+=((countleft-prevleft)/(clickperrotation*gearratio)*wheelcircum);
+    sr+=((countright-prevright)/(clickperrotation*gearratio)*wheelcircum);
+    int wheelspeed=250;
+    if(sl<16 && sr<16){
+      motors.setSpeeds(wheelspeed,wheelspeed);
+    }
+    else{
+      motors.setSpeeds(0,0);
+    }
+
+
+    prevMillis = currentMillis;
+  }
+}
